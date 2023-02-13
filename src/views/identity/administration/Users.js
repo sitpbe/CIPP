@@ -90,8 +90,56 @@ const Offcanvas = (row, rowIndex, formatExtraData) => {
             label: 'Convert to Shared Mailbox',
             color: 'info',
             modal: true,
-            modalUrl: `/api/ExecConvertToSharedMailbox?TenantFilter=${tenant.defaultDomainName}&ID=${row.id}`,
+            modalUrl: `/api/ExecConvertToSharedMailbox?TenantFilter=${tenant.defaultDomainName}&ID=${row.userPrincipalName}`,
             modalMessage: 'Are you sure you want to convert this user to a shared mailbox?',
+          },
+          {
+            label: 'Enable Online Archive',
+            color: 'info',
+            modal: true,
+            modalUrl: `/api/ExecEnableArchive?TenantFilter=${tenant.defaultDomainName}&ID=${row.userPrincipalName}`,
+            modalMessage: 'Are you sure you want to enable the online archive for this user?',
+          },
+          {
+            label: 'Set Out of Office',
+            color: 'info',
+            modal: true,
+            modalType: 'POST',
+            modalBody: {
+              user: row.userPrincipalName,
+              TenantFilter: tenant.defaultDomainName,
+              message: row.message,
+            },
+            modalUrl: `/api/ExecSetOoO`,
+            modalInput: true,
+            modalMessage:
+              'Enter a out of office message and press continue to set the out of office.',
+          },
+          {
+            label: 'Disable Out of Office',
+            color: 'info',
+            modal: true,
+            modalType: 'POST',
+            modalBody: {
+              user: row.userPrincipalName,
+              TenantFilter: tenant.defaultDomainName,
+              Disable: true,
+            },
+            modalUrl: `/api/ExecSetOoO`,
+            modalMessage: 'Are you sure you want to disable the out of office?',
+          },
+          {
+            label: 'Disable Email Forwarding',
+            color: 'info',
+            modal: true,
+            modalType: 'POST',
+            modalBody: {
+              user: row.userPrincipalName,
+              TenantFilter: tenant.defaultDomainName,
+              message: row.message,
+            },
+            modalUrl: `/api/ExecDisableEmailForward`,
+            modalMessage: 'Are you sure you want to disable forwarding of this users emails?',
           },
           {
             label: 'Block Sign In',
@@ -120,6 +168,13 @@ const Offcanvas = (row, rowIndex, formatExtraData) => {
             modal: true,
             modalUrl: `/api/ExecResetPass?MustChange=false&TenantFilter=${tenant.defaultDomainName}&ID=${row.id}`,
             modalMessage: 'Are you sure you want to reset the password for this user?',
+          },
+          {
+            label: 'Clear ImmutableId',
+            color: 'warning',
+            modal: true,
+            modalUrl: `/api/ExecClrImmId?TenantFilter=${tenant.defaultDomainName}&ID=${row.id}`,
+            modalMessage: 'Are you sure you want to clear the ImmutableId for this user?',
           },
           {
             label: 'Revoke all user sessions',
@@ -214,6 +269,14 @@ const Users = () => {
       title="Users"
       titleButton={titleButton}
       datatable={{
+        filterlist: [
+          { filterName: 'Enabled users', filter: '"accountEnabled":true' },
+          { filterName: 'AAD users', filter: '"onPremisesSyncEnabled":false' },
+          { filterName: 'Synced users', filter: '"onPremisesSyncEnabled":true' },
+          { filterName: 'Guest users', filter: '"usertype":"guest"' },
+          { filterName: 'Users with a license', filter: '"assignedLicenses":[{' },
+          { filterName: 'Users without a license', filter: '"assignedLicenses":[]' },
+        ],
         columns,
         path: '/api/ListUsers',
         reportName: `${tenant?.defaultDomainName}-Users`,
